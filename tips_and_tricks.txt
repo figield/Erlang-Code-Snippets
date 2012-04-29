@@ -1,0 +1,54 @@
+
+%% 1. How to run erlang command from unix shell:
+$> erl -boot start_clean -noshell -eval 'io:format("hi\n")' -eval 'halt(0)'
+% or
+$> erl -boot start_clean -noshell -eval 'io:format("hi\n"), halt(0)'
+
+% example:
+erl -sname ad_service -eval 'ok=mnesia:create_schema([node()]).' -s init stop
+
+%% 2. How to convert from decimal to binary:
+>lists:flatten(io_lib:format("~8.2.0B", [127])).
+"01111111"
+
+> [P] = "+", erlang:integer_to_list(P, 2). 
+"101011"
+
+%% 3. How to convert from decimal to hexadecimal:
+>lists:flatten(io_lib:format("~2.16.0B", [127])).
+"7F"
+
+> [P] = "+", erlang:integer_to_list(P, 16).
+"2B"
+
+% also:
+> [P] = "+", erlang:integer_to_list(P, 10).
+"43"
+
+%% 4. Printing float numbers:
+lists:flatten(io_lib:format("~.*..f", [2, S]));
+
+% also:
+> lists:flatten([io_lib:format("~8.2.0B,", [L]) || L <- [1,2,3]]).
+> lists:flatten([io_lib:format("~2.16.0B ", [L]) || L <- [1,2,3]]).
+
+%% 5. Tracing and debugging:
+dbg:start().
+dbg:tracer().
+dbg:p(all, call).
+dbg:p(all, c).
+dbg:ctp().
+dbg:tpl(erlang_module,'_','_',[{'_',[],[{return_trace}]}]).
+dbg:tp(config_storage,[]).
+dbg:tp(erlang_module,dbg:fun2ms(fun(_) -> return_trace() end)).
+dbg:tp(ad_service_server, handle_request, []).
+dbg:tp(http_utils, request_url, dbg:fun2ms(fun(_) -> return_trace()end)).
+dbg:tpl(http_utils,'_','_',[]).
+dbg:tpl(http_utils,query_to_record,1,[{'_',[],[return_trace]}]). 
+dbg:tpl(programme, []).
+ 
+dbg:tpl(my_module, dbg:fun2ms(fun(_) -> exception_trace() end)).
+
+%% 6. OS cmd (uptime):
+os:cmd("uptime").
+
