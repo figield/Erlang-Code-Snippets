@@ -64,3 +64,9 @@ binary_to_integer(<<>>, Acc) ->
 % It is probably more efficient than: 
 
 list_to_integer(binary_to_list()) 
+
+%% 8. Run eunit tests:
+erl -noshell -sasl errlog_type error -pa out/ -eval 'eunit:test(moduleWithEunitTests,[{verbose,true}]),init:stop().'
+
+%%  9. How to load beam from out dir and start shell:
+erl -sname test -sasl errlog_type error -pa out/
