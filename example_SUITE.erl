@@ -3,7 +3,8 @@
 %%% Author  : Dawid Figiel
 %%% Description : 
 %%%           For educational purposes
-%%% Created : 
+%%% How to run : 
+%%%           http://www.erlang.org/doc/apps/common_test/run_test_chapter.html#id72614
 %%%-------------------------------------------------------------------
 -module(example_SUITE).
 -compile(export_all).
