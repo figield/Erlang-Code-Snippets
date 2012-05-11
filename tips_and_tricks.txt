@@ -86,5 +86,23 @@ lists:reverse(lists:keysort(2,[{T, ets:info(T, memory)} || T <- ets:all()])).
 test1() -> ?create(x,"Noel").  % -> {x,"Noel",undefined}
 test2() -> ?create(y,"Noel").  % -> {y,undefined,"Noel"}
 
+%% 13. binary_to_list VS bitstring_to_list  
+
+1> A = <<1:2, 23:6>>.
+<<"W">>
+2> B = <<1:2, 23:5>>.
+<<55:7>>
+3> binary_to_list(A).
+"W"
+4> binary_to_list(B).
+** exception error: bad argument
+     in function  binary_to_list/1
+        called as binary_to_list(<<55:7>>)
+5> bitstring_to_list(A).
+"W"
+6> bitstring_to_list(B).
+[<<55:7>>]
+
+
 
 
