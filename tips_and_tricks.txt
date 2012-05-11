@@ -53,8 +53,7 @@ os:cmd("uptime").
 
 %% 7. Binary to integer:
 
-binary_to_integer(B=(<<_N, _/binary>>)) ->
-    binary_to_integer(B, 0).
+binary_to_integer(B=(<<_N, _/binary>>)) -> binary_to_integer(B, 0).
 
 binary_to_integer(<<N, Rest/binary>>, Acc) when N >= $0 andalso N =< $9 ->
     binary_to_integer(Rest, (N - $0) + (Acc * 10));
@@ -70,3 +69,22 @@ erl -noshell -sasl errlog_type error -pa out/ -eval 'eunit:test(moduleWithEunitT
 
 %%  9. How to load beam from out dir and start shell:
 erl -sname test -sasl errlog_type error -pa out/
+
+%% 10. Which process uses the most memory:
+lists:reverse(lists:keysort(2,[{P, erlang:process_info(P, heap_size)} || P <- erlang:processes()])).
+
+%% 11. Which ets table uses the most memory:
+lists:reverse(lists:keysort(2,[{T, ets:info(T, memory)} || T <- ets:all()])).
+
+%% 12. [erlang-questions] record type as variable
+
+-record(x,{name,zz}).
+-record(y,{yy,name}).
+-export([test1/0,test2/0]).
+-define(create(Type,Name),#Type{name = Name}).  %% <- in my opinion this is the most interesing part
+
+test1() -> ?create(x,"Noel").  % -> {x,"Noel",undefined}
+test2() -> ?create(y,"Noel").  % -> {y,undefined,"Noel"}
+
+
+
