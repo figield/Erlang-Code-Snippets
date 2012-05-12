@@ -4,13 +4,24 @@
 %%% Author:	 Dawid Figiel
 %%% Description: gen_server sandbox
 %%%
-%%% Change the code run it and play again ;)
+%%% Change the code, run it and play again ;)
 %%%
-%%% gen_server_example:start(),
-%%% gen_server_example:show_statistics().
-%%% gen_server_example:populate2(40000).
+%%% gen_server_sandbox:start(),
+%%% gen_server_sandbox:show_statistics().
+%%% gen_server_sandbox:populate2(1000000).
 %%%
-%%% ----------------------------------------------------------
+%%% Tip: 
+%%%
+%%% erl +P 1000026
+%%%
+%%% -P number   set maximum number of processes on this node,
+%%%             valid range is [256-134'217'727]
+%%%
+%%% More:
+%%%
+%%%  http://www.erlang.org/doc/man/erl.html 
+%%%
+%%%---------------------------------------------------
 -module(gen_server_sandbox).
 -vsn('0.01').
 
@@ -88,7 +99,6 @@ populate2(Num) ->
 populate2_loop(Num, Num) ->
     ok;
 populate2_loop(Counter, Num) ->
-    io:format("Counter:~p ~n",[Counter]),
     case catch gen_server:call(?MODULE, {give_one_birth, Counter + 1}, ?CALL_TMO) of
         ok ->
             populate2_loop(Counter + 1, Num);
@@ -166,7 +176,7 @@ stop() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-    %process_flag(trap_exit, true),
+    process_flag(trap_exit, true),
     {M0, H0} = lists:foldl(fun(P, {Memory, Heap}) ->
                                    {heap_size, H} = erlang:process_info(P, heap_size),
                                    {memory, M} = erlang:process_info(P, memory),
@@ -203,9 +213,9 @@ handle_call({populate, Num}, _From, S) ->
     {reply, ok, S};
 
 handle_call({give_one_birth, 1}, _From, S) ->
-    Pid = spawn(fun()->
-                        receive after ?LIVETIME -> ok end
-                end),
+    Pid = spawn_link(fun()->
+                             receive after ?LIVETIME -> ok end
+                     end),
     {heap_size, H} = erlang:process_info(Pid, heap_size),
     {memory, M} = erlang:process_info(Pid, memory),
     {reply, ok,  S#state{population_size = S#state.population_size + 1,
@@ -214,7 +224,7 @@ handle_call({give_one_birth, 1}, _From, S) ->
                         }};
 
 %% handle_call({give_one_birth, Num}, _From, S) ->
-%%     case catch spawn(fun()-> receive after ?LIVETIME -> ok end end) of
+%%     case catch spawn_link(fun()-> receive after ?LIVETIME -> ok end end) of
 %%         Pid when is_pid(Pid) ->
 %%             case Num rem 100 of
 %%                 0 -> io:format("~p ", [Num]);
@@ -227,7 +237,7 @@ handle_call({give_one_birth, 1}, _From, S) ->
 %%     end;
 
 handle_call({give_one_birth, Num}, _From, S) ->
-    spawn(fun()-> receive after ?LIVETIME -> ok end end),
+    spawn_link(fun()-> receive after ?LIVETIME -> ok end end),
     case Num rem 100 of
         0 -> io:format("~p ", [Num]);
         _ -> ok
@@ -289,9 +299,9 @@ handle_cast(_Request, State) ->
 %% @end
 %%--------------------------------------------------------------------
 handle_info({give_one_birth, 1}, S) ->
-    Pid = spawn(fun()->
-                        receive after ?LIVETIME -> ok end
-                end),
+    Pid = spawn_link(fun()->
+                             receive after ?LIVETIME -> ok end
+                     end),
     {heap_size, H} = erlang:process_info(Pid, heap_size),
     {memory, M} = erlang:process_info(Pid, memory),
     {noreply, S#state{population_size = S#state.population_size + 1,
@@ -300,9 +310,9 @@ handle_info({give_one_birth, 1}, S) ->
                      }};
 
 handle_info({give_one_birth, Num}, S) ->
-    spawn(fun()->
-                  receive after ?LIVETIME -> ok end
-          end),
+    spawn_link(fun()->
+                       receive after ?LIVETIME -> ok end
+               end),
     case Num rem 100 of
         0 -> io:format("~p ", [Num]);
         _ -> ok
