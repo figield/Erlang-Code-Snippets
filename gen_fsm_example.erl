@@ -1,5 +1,9 @@
 -module(gen_fsm_example).
 
+%% An easy example of the Erlang gen_fsm for beginners. 
+%% This is implemented example from the page: 
+%% http://www.erlang.org/doc/design_principles/fsm.html
+
 -behaviour(gen_fsm).
 
 %% Interface functions
