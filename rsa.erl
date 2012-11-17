@@ -57,12 +57,10 @@ code1(I, J, M) ->
     %% X = (I^J) MOD M 
     ?lib:powmod(I, J, M).
     
-
 decode1(X, T, M) ->
     %% I = (X^T) MOD M 
     ?lib:powmod(X, T, M).
     
-
 main()->
     {T,J,M} = generate_rsa_numbers(),
 
@@ -74,8 +72,9 @@ main()->
     io:format("Coded numbers: ~p~n", [CodedMsg]),
     io:format("Deoded message: ~p~n", [DecodedMsg]).
 
-
-%% Return A^B MOD M 
+%%======================================================================
+%% A^B MOD M 
+%%======================================================================
 powmod(A, B, M) ->
     powmod1(A, B, M, 1).
 powmod1(_A, 0, _M, Y) -> 
@@ -86,12 +85,18 @@ powmod1(A, B, M, Y) ->
                 false -> Y;
                 true  -> mod(Y * A, M)
             end).
- 
+
+%%======================================================================
+%% X mod Y
+%%======================================================================
 mod(X, Y) -> 
     (X rem Y + Y) rem Y.
 
-%% Returns d, x, y 
+%%======================================================================
+%% Returns {D, X, Y} 
 %%  where d = nwd(a, b) = ax + by 
+%% TODO: have tail recursive and not tail recursive version
+%%======================================================================
 ext_Euclid(A, 0) -> 
     {D, X1, Y1} = {A, 1, 0},
     %io:format("D = AX + BY~n"),
@@ -103,39 +108,89 @@ ext_Euclid(A, B) ->
     %io:format("~p = ~p * ~p + ~p * ~p ~n",[A * X1 + B * Y1, A, X1, B, Y1]),
     {D, X1, Y1}.
 
-%% TODO: have tail recursive and not tail recursive
-
-
-%%     public static long get_prime_number(long n){
-%%         boolean[] numbersTable = new boolean[(int) (n+1)];
-%%         long LastPrimeNumber = 2;
-%%         //sieve of Eratosthenes
-%%         for(int i = 2; i*i <= n; i++){
-%%                 if (numbersTable[i] == true)
-%%                     continue;
-%%                 for (int j = 2 * i ; j <= n; j += i)
-%%                     numbersTable[j] = true;                
-%%             }
-%%         for (int i = (int) n; i >= 2; i--)
-%%             if (numbersTable[i] == false){
-%%                 System.out.println(i);
-%%                 LastPrimeNumber = i;
-%%                 break;
-%%             }
-%%         return LastPrimeNumber;
-%%     }
-    
+%%======================================================================
 %% Return the biggest prime number from the range 2..N
+%% TODO: finish
+%%======================================================================
 get_prime_number(N) ->
+    N.
+
+%%======================================================================
+%% Return the biggest prime number from the range 2..N
+%%======================================================================
+
+%% Version 1:
+%% eheap_alloc: Cannot allocate 1781763260 bytes of memory (of type "old_heap").
+%% rsa:get_prime_number(9999999999).
+%% Crash dump was written to: erl_crash.dump
+filter_prime_numbers(N) ->    
     filter_prime_numbers(2, trunc(math:sqrt(N)), lists:seq(2, N),[]).
 
 filter_prime_numbers(I, L, [P | Numbers], PrimeNumbers) when I =< L ->
     filter_prime_numbers(I+1, L, [ X ||  X <- Numbers, X rem I /= 0], [P|PrimeNumbers]);
 filter_prime_numbers(_,_,RestOfPrime,PrimeNumbers) ->
     lists:reverse(PrimeNumbers) ++ RestOfPrime.
-    
-%% TODO: IMPROVE!
-%% rsa:get_prime_number(9999999999).
 
-%% Crash dump was written to: erl_crash.dump
-%% eheap_alloc: Cannot allocate 1781763260 bytes of memory (of type "old_heap").
+%% Version 2:
+filter_prime_numbers2(N) ->    
+         filter_prime_numbers2(2, N, []).
+
+filter_prime_numbers2(Ni, Nend, PrimeNumbers) when Ni =< Nend ->
+    case is_prime(Ni, 2, trunc(math:sqrt(Ni)), true) of
+        true -> filter_prime_numbers2(Ni + 1, Nend, [Ni | PrimeNumbers]);
+        false -> filter_prime_numbers2(Ni + 1, Nend, PrimeNumbers)
+    end;
+filter_prime_numbers2(_,_,PrimeNumbers) ->
+    PrimeNumbers.
+
+%% Version 3:
+filter_prime_numbers3(2) ->
+    [2];
+filter_prime_numbers3(N) ->
+    filter_prime_numbers3(3, N, [], true).
+
+filter_prime_numbers3(Ni, Nend, PrimeNumbers, true) when Ni =< Nend ->    
+    filter_prime_numbers3(Ni + 1, Nend, [Ni - 1 | PrimeNumbers], 
+                          is_prime(Ni, 2, trunc(math:sqrt(Ni)), true));
+filter_prime_numbers3(Ni, Nend, PrimeNumbers, false) when Ni =< Nend ->    
+    filter_prime_numbers3(Ni + 1, Nend, PrimeNumbers, 
+                          is_prime(Ni, 2, trunc(math:sqrt(Ni)), true));
+filter_prime_numbers3(Ni, Nend, PrimeNumbers, false) when Ni > Nend ->
+    PrimeNumbers;
+filter_prime_numbers3(Ni, Nend, PrimeNumbers, true) when Ni > Nend ->
+    [Ni - 1 | PrimeNumbers].
+
+
+%%======================================================================
+%% Check if P is a prime number
+%%======================================================================
+is_prime(P) ->
+    is_prime(P, 2, trunc(math:sqrt(P)), true).
+
+is_prime(_P, _A, _SqrtP, false) ->
+    false;
+is_prime(_P, A, SqrtP, true) when A > SqrtP ->
+    true;
+is_prime(P, A, SqrtP, true) when A =< SqrtP ->
+    is_prime(P, A + 1, SqrtP, P rem A /= 0).
+
+%%======================================================================
+%% Some tests and benchmarks
+%%======================================================================
+
+%% Check which method is the fastest one
+run(F, N)->
+    io:format("Run method ~p for N = ~p ~n",[F, N]),
+    Start = now(),  
+    ?MODULE:F(N),
+    T = timer:now_diff(now(), Start),    
+    io:format("Time: ~p sec.~n~n",[(T div 1000000)]).
+
+test() ->
+    io:format("~nCheck which method is the fastest one:~n~n"),
+    run(filter_prime_numbers,  10000000),
+    run(filter_prime_numbers2, 10000000),
+    run(filter_prime_numbers3, 10000000).
+    
+%% Check if each method is giving the same result
+%% TODO
