@@ -110,17 +110,31 @@ ext_Euclid(A, B) ->
 
 %%======================================================================
 %% Return the biggest prime number from the range 2..N
-%% TODO: finish
 %%======================================================================
 get_prime_number(N) ->
-    N.
+    get_prime_number(2, N, 2).
+
+get_prime_number(From, To) ->
+    get_prime_number(From, To, 2).
+
+get_prime_number(Ni, Nend, PrimeNumber) when Ni =< Nend ->
+    case is_prime(Ni, 2, trunc(math:sqrt(Ni)), true) of
+        true -> 
+            io:format("~p, ",[Ni]),
+            get_prime_number(Ni + 1, Nend, Ni);
+        false -> 
+            get_prime_number(Ni + 1, Nend, PrimeNumber)
+    end;
+get_prime_number(_,_,PrimeNumber) ->
+    PrimeNumber.
 
 %%======================================================================
 %% Return the biggest prime number from the range 2..N
 %%======================================================================
 
 %% Version 1:
-%% eheap_alloc: Cannot allocate 1781763260 bytes of memory (of type "old_heap").
+%% eheap_alloc: Cannot allocate 1781763260 bytes of memory 
+%% (of type "old_heap").
 %% rsa:get_prime_number(9999999999).
 %% Crash dump was written to: erl_crash.dump
 filter_prime_numbers(N) ->    
@@ -179,18 +193,36 @@ is_prime(P, A, SqrtP, true) when A =< SqrtP ->
 %%======================================================================
 
 %% Check which method is the fastest one
+test1() ->
+    io:format("~nCheck which method is the fastest one:~n~n"),
+    run(filter_prime_numbers,  10000000), % 213 sec
+    run(filter_prime_numbers2, 10000000), % 225 sec
+    run(filter_prime_numbers3, 10000000). % 225 sec
+
 run(F, N)->
     io:format("Run method ~p for N = ~p ~n",[F, N]),
     Start = now(),  
     ?MODULE:F(N),
     T = timer:now_diff(now(), Start),    
     io:format("Time: ~p sec.~n~n",[(T div 1000000)]).
-
-test() ->
-    io:format("~nCheck which method is the fastest one:~n~n"),
-    run(filter_prime_numbers,  10000000),
-    run(filter_prime_numbers2, 10000000),
-    run(filter_prime_numbers3, 10000000).
     
 %% Check if each method is giving the same result
-%% TODO
+test2() ->
+    R = lists:sort(filter_prime_numbers(9998)),
+    R = lists:sort(filter_prime_numbers2(9999)),
+    R = lists:sort(filter_prime_numbers3(9999)),
+    ok.
+    
+%% Try to find really big prime number
+test3()->
+    run(get_prime_number, 
+        999999999999999999999999999999999999999999999901,   %% from
+        999999999999999999999999999999999999999999999999).  %% to
+
+run(F, From, To)->
+    io:format("Looking for the prime number from ~p to ~p~n",
+              [From, To]),
+    Start = now(),  
+    ?MODULE:F(From, To),
+    T = timer:now_diff(now(), Start),    
+    io:format("Time: ~p sec.~n~n",[(T div 1000000)]).
