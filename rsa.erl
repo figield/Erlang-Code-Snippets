@@ -25,6 +25,7 @@
 
 -define(lib, ?MODULE).
                
+%% TODO: finish this
 generate_rsa_numbers() ->
     %% select two big prime numbers P and Q
     P = ?lib:get_prime_number(170),
@@ -174,6 +175,7 @@ filter_prime_numbers3(Ni, Nend, PrimeNumbers, false) when Ni > Nend ->
 filter_prime_numbers3(Ni, Nend, PrimeNumbers, true) when Ni > Nend ->
     [Ni - 1 | PrimeNumbers].
 
+%% TODO: look for better methods
 
 %%======================================================================
 %% Check if P is a prime number
@@ -187,6 +189,8 @@ is_prime(_P, A, SqrtP, true) when A > SqrtP ->
     true;
 is_prime(P, A, SqrtP, true) when A =< SqrtP ->
     is_prime(P, A + 1, SqrtP, P rem A /= 0).
+
+%% TODO: look for better methods
 
 %%======================================================================
 %% Some tests and benchmarks
@@ -214,10 +218,11 @@ test2() ->
     ok.
     
 %% Try to find really big prime number
+%% TODO: do it parallely
 test3()->
     run(get_prime_number, 
-        999999999999999999999999999999999999999999999901,   %% from
-        999999999999999999999999999999999999999999999999).  %% to
+        999999999999999999999999999999901,   %% from
+        999999999999999999999999999999999).  %% to
 
 run(F, From, To)->
     io:format("Looking for the prime number from ~p to ~p~n",
@@ -226,3 +231,8 @@ run(F, From, To)->
     ?MODULE:F(From, To),
     T = timer:now_diff(now(), Start),    
     io:format("Time: ~p sec.~n~n",[(T div 1000000)]).
+
+
+%% TODO: draw graphs of the resources usage
+%% TODO: Add C++ driver to speed up?
+%% TODO: split function to different module libs
