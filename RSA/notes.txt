@@ -1,0 +1,6 @@
+Wiecej metod szyfrowania:
+http://wazniak.mimuw.edu.pl/images/0/0f/Bsi_04_wykl.pdf
+
+O odwrotności modulo:
+http://edu.i-lo.tarnow.pl/inf/alg/001_search/0009.php
+
