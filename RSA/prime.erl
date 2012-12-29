@@ -1,5 +1,6 @@
 -module(prime).
-
+-compile(export_all).
+-author('Dawid Figiel').
 
 %%======================================================================
 %% Check if P is a prime number

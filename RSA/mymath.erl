@@ -1,5 +1,6 @@
 -module(mymath).
-
+-compile(export_all).
+-author('Dawid Figiel').
 
 %%======================================================================
 %% X mod Y
@@ -37,3 +38,23 @@ ext_Euclid(A, B) ->
     {D, X1, Y1} = {D, Y, X - trunc(A/B) * Y},
     %io:format("~p = ~p * ~p + ~p * ~p ~n",[A * X1 + B * Y1, A, X1, B, Y1]),
     {D, X1, Y1}.
+
+
+code1(I, J, M) ->
+    %% X = (I^J) MOD M 
+    mymath:powmod(I, J, M).
+    
+decode1(X, T, M) ->
+    %% I = (X^T) MOD M 
+    mymath:powmod(X, T, M).
+
+
+calc(Fun, A, B, C) when is_function(Fun) -> %% safer method
+    lists:foldr(fun(A1, Acc)->
+                        [Fun(A1,B,C)|Acc]
+                end,[],A);
+calc(Fun, A, B, C) when is_atom(Fun) ->
+    lists:foldr(fun(A1, Acc)->
+                        [?MODULE:Fun(A1,B,C)|Acc]
+                        %[apply(?MODULE,Fun,[A1,B,C])|Acc]
+                end,[],A).

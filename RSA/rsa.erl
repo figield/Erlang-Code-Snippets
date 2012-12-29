@@ -1,33 +1,11 @@
 -module(rsa).
-%% TODO: finish RSA alg.
-
 -compile(export_all).
+-author('Dawid Figiel').
 
-%%     long[] code(String Msg) {
-%%         long[] Ints = LIB.string_to_int_tab(Msg);
-%%         long[] CodedInts = new long[Msg.length()];
-%%         for (int i = 0; i < Msg.length();++i){
-%%             long I = code1(Ints[i]);
-%%             //System.out.println(I);
-%%             CodedInts[i] = I;
-%%         }        
-%%         return CodedInts;
-%%     }
-
-%%     String decode(long[] CodedInts) {
-%%         long[] DecodedInts = new long[CodedInts.length];
-%%         for (int i = 0; i < CodedInts.length;++i){
-%%             long I = decode1(CodedInts[i]);
-%%             //System.out.println(I);
-%%             DecodedInts[i] = I;
-%%         }
-%%         return LIB.int_tab_to_string(DecodedInts);
-%%   
-
-generate_rsa_numbers() ->
+generate_rsa_numbers(P1, Q1) ->
     %% select two big prime numbers P and Q
-    P = prime:get_prime_number(170),
-    Q = prime:get_prime_number(230),    
+    P = prime:get_prime_number(P1),
+    Q = prime:get_prime_number(Q1),    
     M = P * Q,
     F = (P - 1) * (Q - 1),
 
@@ -39,7 +17,7 @@ generate_rsa_numbers() ->
     %% (T*J) MOD F = 1
     %%(so there exist X for which T*J = X*F + 1)
     %% T > 0
-    [D=1,_,T] = mymath:ext_Euclid(F, J),    
+    {D=1,_,T} = mymath:ext_Euclid(F, J),    
     
     io:format("nwd(F, J) = ~p~n", [D]),
     io:format("public    = ~p~n", [J]),
@@ -51,23 +29,25 @@ generate_rsa_numbers() ->
    
     {T,J,M}.
 
+%% X = (I^J) MOD M 
+code(I, J, M) ->
+    mymath:calc(fun mymath:code1/3, I, J, M).
+        
+%% I = (X^T) MOD M 
+decode(X, T, M) ->
+    mymath:calc(decode1, X, T, M).
 
-code1(I, J, M) ->
-    %% X = (I^J) MOD M 
-    mymath:powmod(I, J, M).
-    
-decode1(X, T, M) ->
-    %% I = (X^T) MOD M 
-    mymath:powmod(X, T, M).
-    
-main()->
-    {T,J,M} = generate_rsa_numbers(),
+%% TODO: Handle some exceptions
+main(P, Q)->
+    {T,J,M} = generate_rsa_numbers(P, Q),
 
-    Msg = [64], % = "My secret message :)"
-    CodedMsg = code1(Msg, J, M),
-    DecodedMsg = decode1(CodedMsg, T, M),
+    Msg = "My secret message :)",
+    CodedMsg = code(Msg, J, M),
+    DecodedMsg = decode(CodedMsg, T, M),
     
     io:format("Message: ~p~n", [Msg]),
     io:format("Coded numbers: ~p~n", [CodedMsg]),
-    io:format("Deoded message: ~p~n", [DecodedMsg]).
+    io:format("Decoded message: ~p~n", [DecodedMsg]).
 
+test()->
+    main(170, 230).
