@@ -19,11 +19,11 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
-    myapp2_sup:start_link().
+  myapp2_sup:start_link().
 
 %%--------------------------------------------------------------------
 stop(_State) ->
-    ok.
+  ok.
 
 %%====================================================================
 %% Internal functions
@@ -31,7 +31,8 @@ stop(_State) ->
 -ifdef(TEST).
 
 simple_test() ->
-    ok = application:start(myapp2),
-    ?assertNot(undefined == whereis(myapp2_sup)).
+  ok = application:start(eredis),
+  ok = application:start(myapp2),
+  ?assertNot(undefined == whereis(myapp2_sup)).
 
 -endif.
