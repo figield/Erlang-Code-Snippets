@@ -5,7 +5,8 @@
   {mod, { myapp2_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    eredis
    ]},
   {env,[]},
   {modules, []},

@@ -34,8 +34,8 @@ start_link() ->
 %    {ok, { {one_for_all, 0, 1}, []} }.
 
 
-init2([]) ->
-    {ok, { {one_for_one, 5, 10}, [?CHILD(pushbutton, worker)]} }.
+% init2([]) ->
+%     {ok, { {one_for_one, 5, 10}, [?CHILD(pushbutton, worker)]} }.
 
 init(_Args) ->
     SupFlags = #{strategy => one_for_one, intensity => 5, period => 10},
